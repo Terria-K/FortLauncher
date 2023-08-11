@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install Cake
+        uses: actions/checkout@v1
+      - name: Run build.cake
+        uses: cake-build/cake-action@v1
+        with:
+          target: Publish
+          verbosity: Diagnostic
+          arguments: |
+                  configuration: Release
