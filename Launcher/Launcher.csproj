@@ -10,7 +10,7 @@
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$([MSBuild]::IsOSPlatform('Windows'))'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::IsOSPlatform('Windows'))">
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 
