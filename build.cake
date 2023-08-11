@@ -28,8 +28,7 @@ Task("Publish")
 {
     DotNetPublish("./Launcher/Launcher.csproj", new DotNetPublishSettings
     {
-        Configuration = configuration,
-        NoBuild = true
+        Configuration = configuration
     });
 });
 
