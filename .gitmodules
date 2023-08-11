@@ -1,10 +1,6 @@
 [submodule "FNA"]
 	path = FNA
 	url = https://github.com/FNA-XNA/FNA.git
-
 [submodule "NativeFileDialogSharp"]
 	path = NativeFileDialogSharp
-	url = https://github.com/milleniumbug/NativeFileDialogSharp.git
-[submodule "Launcher/NativeFileDialogSharp"]
-	path = Launcher/NativeFileDialogSharp
 	url = https://github.com/milleniumbug/NativeFileDialogSharp.git
