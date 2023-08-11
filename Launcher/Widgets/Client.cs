@@ -110,8 +110,11 @@ public partial class Launcher
         }
         catch (Exception ex)
         {
+            consoleTexts += ex.ToString() + "\n";
+            consoleTexts += ex.StackTrace + "\n";
             Console.WriteLine(ex.ToString());
             Console.WriteLine(ex.StackTrace);
+            Client_consoleRunning = false;
 #if DEBUG
             throw;
 #endif
