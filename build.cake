@@ -26,7 +26,7 @@ Task("Publish")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    DotNetPublish("./FortLauncher.sln", new DotNetPublishSettings
+    DotNetPublish("./Launcher/Launcher.csproj", new DotNetPublishSettings
     {
         Configuration = configuration,
         NoBuild = true
