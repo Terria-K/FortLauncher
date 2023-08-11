@@ -13,9 +13,13 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
     steps:
-      - name: Get the sources
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install Cake
         uses: actions/checkout@v1
-      - name: Run the build script
+      - name: Run build.cake
         uses: cake-build/cake-action@v1
         with:
           target: Publish
