@@ -33,11 +33,11 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
     <Content Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="..\nativelibs\osx\**\*.*">
-			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<Link>osx/%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
     <Content Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="..\nativelibs\lib64\**\*.*">
-			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<Link>lib64/%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
