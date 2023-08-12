@@ -36,8 +36,18 @@ public partial class Launcher
         }
         MenuButtons_EndDisableIfNeeded();
         var smallButtonSize = largeButtonSize with { X = 100};
-        ImGui.SetCursorPosX((ButtonPanelWidth * 0.375f) - (smallButtonSize.X * 0.5f));
+        ImGui.SetCursorPosX((ButtonPanelWidth * 0.26f) - (smallButtonSize.X * 0.5f));
         ImGui.Button("Settings", smallButtonSize);
+        ImGui.SameLine();
+
+        ImGui.BeginDisabled();
+        ImGui.Button("Manage Mods", smallButtonSize);
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) 
+        {
+            ImGui.SetTooltip("Coming Soon...");
+        }
+        ImGui.EndDisabled();
+
         ImGui.SameLine();
         if (ImGui.Button("Quit", smallButtonSize)) 
         {
