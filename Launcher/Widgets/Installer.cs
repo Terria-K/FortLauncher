@@ -302,6 +302,8 @@ public partial class Launcher
             Console.WriteLine(ex.StackTrace);
 #if DEBUG
             throw;
+#else
+            return new List<VersionTags>();
 #endif
         }
     }
