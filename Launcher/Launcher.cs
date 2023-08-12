@@ -17,7 +17,7 @@ public partial class Launcher : Game
 
     public Launcher() 
     {
-        Window.Title = "Fortrise Launcher";
+        Window.Title = "Fort Launcher";
         Window.AllowUserResizing = false;
         graphics = new GraphicsDeviceManager(this);
         graphics.PreferredBackBufferWidth = Width;
