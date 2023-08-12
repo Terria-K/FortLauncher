@@ -31,6 +31,8 @@ public partial class Launcher : Game
         base.Initialize();
 
         ImGui.StyleColorsDark();
+
+        FetchDownloadedVersions();
     }
 
     protected override void LoadContent()
@@ -53,11 +55,16 @@ public partial class Launcher : Game
 
         if (Client_patchPopup)  
         {
-            WidgetPatch(currentClientEdit);
+            WidgetPatch(currentClientEdit ?? SelectedClient);
+        }
+        else if (Installer_popup) 
+        {
+            WidgetInstallerPopup();
         }
         else  
         {
             WidgetClient();
+            WidgetInstaller();
             WidgetMenuButtons();
         }
 

@@ -24,7 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="ImGui.NET" Version="1.89.7.1" />
+    <PackageReference Include="TeuJson" Version="3.1.2" />
+    <PackageReference Include="TeuJson.Generator" Version="3.1.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +44,8 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
+
+
 
 
   <!-- AOT Related stuffs -->

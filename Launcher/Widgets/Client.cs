@@ -1,6 +1,7 @@
 using System.Diagnostics;
-using System.Text;
 using ImGuiNET;
+using TeuJson;
+using TeuJson.Attributes;
 
 namespace FortLauncher;
 
@@ -42,7 +43,6 @@ public partial class Launcher
                 if (ImGui.MenuItem(str))
                 {
                     Client_patchPopup = true;
-                    currentClientEdit = client;
                     Task.Run(() => Client_Patch(client));
                 }
                 if (ImGui.MenuItem("Rename"))
@@ -65,11 +65,38 @@ public partial class Launcher
 
 
         ImGui.EndChild();
+
+        ImGui.SetCursorPosX((250 - 300 * 0.5f));
+        ImGui.SetCursorPosY(250);
+        ImGui.Separator();
+
+        const int posX = 195;
+
+        ImGui.SetCursorPosX(((posX) - 300 * 0.5f));
         ImGui.SetCursorPosY(260);
         if (ImGui.Button("+ Add")) 
         {
             Client_FolderPick();
         }
+        ImGui.SetCursorPosX(((posX + 50) - 300 * 0.5f));
+        ImGui.SetCursorPosY(260);
+        ImGui.BeginDisabled((SelectedClient == null || SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
+        if (ImGui.Button("Patch")) 
+        {
+            Client_patchPopup = true;
+            Task.Run(() => Client_Patch(SelectedClient));
+        }
+        ImGui.EndDisabled();
+
+        ImGui.SetCursorPosX(((posX + 100) - 300 * 0.5f));
+        ImGui.SetCursorPosY(260);
+        ImGui.BeginDisabled((SelectedClient != null && !SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
+        if (ImGui.Button("Unpatch")) 
+        {
+            Client_patchPopup = true;
+            Task.Run(() => Client_Patch(SelectedClient));
+        }
+        ImGui.EndDisabled();
         ImGui.Text(Client_hovered);
 
         ImGui.End();
@@ -78,7 +105,6 @@ public partial class Launcher
             ImGui.OpenPopup("Rename");
             WidgetClient_Rename(currentClientEdit);
         }
-        
     }
 
     private async Task Client_Patch(Client client) 
@@ -90,9 +116,9 @@ public partial class Launcher
             var isUnpatch = client.ClientType.HasFlag(ClientType.FortRise);
             var textUnpatch = isUnpatch ? "--unpatch" : "--patch";
 
-            process.StartInfo.FileName = Path.GetFullPath("installer/Installer.NoAnsi.exe");
+            process.StartInfo.FileName = Path.GetFullPath($"installer/{selectedInstallerVersion}/Installer.NoAnsi.exe");
             process.StartInfo.Arguments = textUnpatch + " \"" + client.Path + "\"";
-            process.StartInfo.WorkingDirectory = Path.GetFullPath("installer");
+            process.StartInfo.WorkingDirectory = Path.GetFullPath($"installer/{selectedInstallerVersion}");
             process.StartInfo.RedirectStandardOutput = true;
             process.OutputDataReceived += Console_Output;
 
@@ -298,4 +324,63 @@ public enum ClientType
     None,
     FortRise,
     Steam
+}
+
+public partial class VersionTags : IDeserialize, ISerialize
+{
+    [Name("ref")]
+    [TeuObject]
+    public string Refs;
+
+    [Name("node_id")]
+    [TeuObject]
+    public string NodeID;
+
+    [Name("url")]
+    [TeuObject]
+    public string Url;
+
+    [Name("object")]
+    [TeuObject]
+    public VersionObject Object;
+
+    [Ignore]
+    public string Name;
+
+    [Ignore]
+    public Version Version 
+    {
+        get 
+        {
+            var index = Name.IndexOf('-');
+            if (index != -1) 
+            {
+                var name = Name.Substring(0, index);
+                return new Version(name);
+            }
+            return new Version(Name);
+        }
+    }
+    
+    public void InitName() 
+    {
+        ReadOnlySpan<char> refTag = Refs.AsSpan();
+        Name = new string(refTag.Slice(10));
+    }
+
+}
+
+public partial class VersionObject: IDeserialize, ISerialize
+{
+    [Name("sha")]
+    [TeuObject]
+    public string Sha;
+
+    [Name("type")]
+    [TeuObject]
+    public string Type;
+
+    [Name("url")]
+    [TeuObject]
+    public string Url;
 }
