@@ -34,6 +34,8 @@ public partial class Launcher
             if (ImGui.Selectable(tag))
             {
                 selectedInstallerVersion = tag;
+                Data.CurrentInstaller = selectedInstallerVersion;
+                Save();
             }
             ImGui.PopID();
             if (ImGui.BeginPopupContextItem(tag)) 
@@ -44,6 +46,7 @@ public partial class Launcher
                     FetchDownloadedVersions();
                     if (tag == selectedInstallerVersion)
                         selectedInstallerVersion = "";
+                    Save();
                 }
                 
                 ImGui.EndPopup();
@@ -268,7 +271,9 @@ public partial class Launcher
         var directories = Directory.GetDirectories(installerDirectory);
         foreach (var dir in directories) 
         {
-            Tags.Add(Path.GetFileName(dir));
+            var installerFile = Path.Combine(dir, "Installer.NoANSI.exe");
+            if (File.Exists(installerFile))
+                Tags.Add(Path.GetFileName(dir));
         }
         Tags = Tags.Reverse().ToHashSet();
     }

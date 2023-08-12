@@ -7,7 +7,6 @@ namespace FortLauncher;
 
 public partial class Launcher 
 {
-    public List<Client> Client = new();
     private List<Client> clientToRemove = new();
     private HashSet<string> clientPaths = new();
     private string Client_hovered = "";
@@ -29,12 +28,14 @@ public partial class Launcher
 
         ImGui.BeginChild("Client-child", new System.Numerics.Vector2(230, 210));
 
-        foreach (var client in Client) 
+        foreach (var client in Data.Clients) 
         {
             ImGui.PushID(client.Path);
             if (ImGui.Selectable(client.Name))
             {
                 SelectedClient = client;
+                Data.CurrentClientPath = SelectedClient.Path;
+                Save();
             }
             ImGui.PopID();
             if (ImGui.BeginPopupContextItem(client.Path)) 
@@ -50,9 +51,13 @@ public partial class Launcher
                     Client_newRename = client.Name;
                     Client_renamePopup = true;
                     currentClientEdit = client;
+                    Save();
                 }
-                if (ImGui.MenuItem("Remove"))
+                if (ImGui.MenuItem("Remove")) 
+                {
                     Client_Remove(client.Name);
+                    Save();
+                }
                 
                 ImGui.EndPopup();
             }
@@ -133,6 +138,7 @@ public partial class Launcher
                     Client_AddFortRise(client);
                 Client_consoleRunning = false;
             }
+            Save();
         }
         catch (Exception ex)
         {
@@ -181,7 +187,6 @@ public partial class Launcher
         var flags = ImGuiInputTextFlags.ReadOnly;
         try 
         {
-
             ImGui.InputTextMultiline("##console-window", ref consoleTexts, 100, new System.Numerics.Vector2(Width - 140, Height - 180), flags);
         }
         catch (Exception ex)
@@ -231,7 +236,7 @@ public partial class Launcher
     
     public void Client_Remove(string clientName) 
     {
-        var client = Client.Where(x => x.Name == clientName).First();
+        var client = Data.Clients.Where(x => x.Name == clientName).First();
         clientToRemove.Add(client);
         if (SelectedClient == client)
             SelectedClient = null;
@@ -241,7 +246,7 @@ public partial class Launcher
     {
         foreach (var client in clientToRemove) 
         {
-            Client.Remove(client);
+            Data.Clients.Remove(client);
             clientPaths.Remove(client.Path);
         }
         clientToRemove.Clear();
@@ -279,17 +284,21 @@ public partial class Launcher
 
         var folderPathStr = new string(folderPath);
 
-        Client.Add(new Client(name, folderPathStr, type));
+        Data.Clients.Add(new Client(name, folderPathStr, type));
         clientPaths.Add(folderPathStr);
     }
 }
 
-public class Client 
+public partial class Client : ISerialize, IDeserialize
 {
+    [TeuObject]
     public string Name;
+    [TeuObject]
     public string Path;
+    [TeuObject]
     public ClientType ClientType;
 
+    [Ignore]
     public string CutPath 
     {
         get
@@ -310,10 +319,12 @@ public class Client
         }
     }
 
+    public Client() {}
+
     public Client(string name, string path, ClientType type) 
     {
         Name = name;
-        Path = path;
+        Path = path.Replace("\\", "/");
         ClientType = type;
     }
 }

@@ -1,6 +1,7 @@
 using ImGuiLib;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
+using TeuJson;
 
 namespace FortLauncher;
 
@@ -8,6 +9,8 @@ public partial class Launcher : Game
 {
     private GraphicsDeviceManager graphics;
     private ImGuiRenderer renderer;
+
+    public SaveData Data;
 
     public const int Width = 1024;
     public const int Height = 640;
@@ -24,10 +27,46 @@ public partial class Launcher : Game
         IsMouseVisible = true;
     }
 
+    public void Save() 
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var combined = Path.Combine(appData, "FortRiseLauncher", "savedata.json");
+        if (!Directory.Exists(Path.GetDirectoryName(combined))) 
+            Directory.CreateDirectory(Path.GetDirectoryName(combined));
+        
+        JsonConvert.SerializeToFile(Data, combined);
+    }
+
+    public void Load() 
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var combined = Path.Combine(appData, "FortRiseLauncher", "savedata.json");
+
+        if (!File.Exists(combined)) 
+        {
+            Data = new SaveData();
+            return;
+        }
+        
+        var json = JsonConvert.DeserializeFromFile<SaveData>(combined);
+        Data = json;
+
+        Data.Clients ??= new List<Client>();
+
+        foreach (var client in Data.Clients) 
+        {
+            if (client.Path == Data.CurrentClientPath)
+                SelectedClient = client;
+        }
+        selectedInstallerVersion = Data.CurrentInstaller;
+    }
+
     protected override void Initialize()
     {
         renderer = new ImGuiRenderer(this);
         renderer.RebuildFontAtlas();
+
+        Load();
         base.Initialize();
 
         ImGui.StyleColorsDark();
