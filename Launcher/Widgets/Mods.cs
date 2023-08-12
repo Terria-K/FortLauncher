@@ -122,16 +122,12 @@ public partial class Launcher
 
             var arrayOfModsID = JsonTextReader.FromText(json).AsJsonArray;
             urlBuilder.Append("https://api.gamebanana.com/Core/Item/Data?");
-            for (int i = 0; i < arrayOfModsID.Count; i++)
+            foreach (JsonArray mod in arrayOfModsID.AsParallel())
             {
-                var mod = arrayOfModsID[i].AsJsonArray;
-                AddMod(mod, i);
-            }
-            var results = await httpClient.GetStringAsync(urlBuilder.ToString());
-            var arrayOfMods = JsonTextReader.FromText(results).AsJsonArray;
-            foreach (JsonArray result in arrayOfMods.AsParallel())
-            {
-                await AddToModList(httpClient, result);
+                var result = await httpClient.GetStringAsync(
+                    $"https://api.gamebanana.com/Core/Item/Data?itemtype={mod[0]}&itemid={mod[1]}&fields=name,Owner().name,description,downloads,Preview().sSubFeedImageUrl(),Url().sDownloadUrl()");
+                var jsonArray = JsonTextReader.FromText(result).AsJsonArray;
+                await AddToModList(httpClient, jsonArray);
             }
         }
         catch (Exception ex)
