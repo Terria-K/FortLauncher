@@ -95,7 +95,7 @@ public partial class Launcher
 
         ImGui.SetCursorPosX(((posX + 100) - 300 * 0.5f));
         ImGui.SetCursorPosY(260);
-        ImGui.BeginDisabled((SelectedClient != null && !SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
+        ImGui.BeginDisabled((SelectedClient == null || !SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
         if (ImGui.Button("Unpatch")) 
         {
             Client_patchPopup = true;
@@ -238,8 +238,11 @@ public partial class Launcher
     {
         var client = Data.Clients.Where(x => x.Name == clientName).First();
         clientToRemove.Add(client);
-        if (SelectedClient == client)
+        if (SelectedClient == client) 
+        {
             SelectedClient = null;
+            Data.CurrentClientPath = "";
+        }
     }
 
     public void Client_DoRemove() 
@@ -249,7 +252,11 @@ public partial class Launcher
             Data.Clients.Remove(client);
             clientPaths.Remove(client.Path);
         }
-        clientToRemove.Clear();
+        if (clientToRemove.Count > 0) 
+        {
+            clientToRemove.Clear();
+            Save();
+        }
     }
 
     public void Client_FolderPick()
@@ -258,7 +265,7 @@ public partial class Launcher
         if (!folderPicker.IsOk)
             return;
         
-        if (clientPaths.Contains(folderPicker.Path))
+        if (clientPaths.Contains(folderPicker.Path.Replace('\\', '/'))) 
             return;
         ReadOnlySpan<char> folderPath = folderPicker.Path;
         var towerFallPath = Path.Join(folderPath, "TowerFall.exe");
@@ -285,7 +292,8 @@ public partial class Launcher
         var folderPathStr = new string(folderPath);
 
         Data.Clients.Add(new Client(name, folderPathStr, type));
-        clientPaths.Add(folderPathStr);
+        clientPaths.Add(folderPathStr.Replace('\\', '/'));
+        Save();
     }
 }
 
