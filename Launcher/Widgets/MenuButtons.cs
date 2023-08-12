@@ -40,13 +40,11 @@ public partial class Launcher
         ImGui.Button("Settings", smallButtonSize);
         ImGui.SameLine();
 
-        ImGui.BeginDisabled();
-        ImGui.Button("Manage Mods", smallButtonSize);
-        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) 
+        if (ImGui.Button("Mods", smallButtonSize)) 
         {
-            ImGui.SetTooltip("Coming Soon...");
+            Mods_popup = true;
+            Task.Run(() => NoRefreshMods());
         }
-        ImGui.EndDisabled();
 
         ImGui.SameLine();
         if (ImGui.Button("Quit", smallButtonSize)) 

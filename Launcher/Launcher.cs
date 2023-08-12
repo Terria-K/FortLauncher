@@ -100,6 +100,10 @@ public partial class Launcher : Game
         {
             WidgetInstallerPopup();
         }
+        else if (Mods_popup) 
+        {
+            WidgetMods();
+        }
         else  
         {
             WidgetClient();
