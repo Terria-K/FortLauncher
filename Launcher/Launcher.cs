@@ -55,6 +55,7 @@ public partial class Launcher : Game
 
         foreach (var client in Data.Clients) 
         {
+            clientPaths.Add(client.Path);
             if (client.Path == Data.CurrentClientPath)
                 SelectedClient = client;
         }
