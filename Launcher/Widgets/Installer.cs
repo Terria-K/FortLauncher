@@ -7,7 +7,6 @@ namespace FortLauncher;
 
 public partial class Launcher 
 {
-    private bool Installer_popup;
     private bool refreshed = true;
     private VersionTags currentTag;
     private List<VersionTags> tags;
@@ -64,7 +63,7 @@ public partial class Launcher
         ImGui.SetCursorPosY(260);
         if (ImGui.Button("+ Add")) 
         {
-            Installer_popup = true;
+            State = LauncherState.Installer;
         }
 
         ImGui.SetCursorPosX((posX + 50 - 300 * 0.5f));
@@ -148,7 +147,7 @@ public partial class Launcher
 
         if (ImGui.Button("Back")) 
         {
-            Installer_popup = false;
+            State = LauncherState.Main;
         }
 
         ImGui.End();

@@ -14,6 +14,9 @@ public partial class Launcher : Game
 
     public const int Width = 1024;
     public const int Height = 640;
+    public LauncherState State;
+
+    public enum LauncherState { Main, Settings, Patching, Installer, Mods }
 
     public Launcher() 
     {
@@ -92,26 +95,26 @@ public partial class Launcher : Game
         renderer.BeforeLayout(gameTime);
         SetupDockspace();
 
-
-        if (Client_patchPopup)  
+        switch (State) 
         {
-            WidgetPatch(currentClientEdit ?? SelectedClient);
-        }
-        else if (Installer_popup) 
-        {
-            WidgetInstallerPopup();
-        }
-        else if (Mods_popup) 
-        {
-            WidgetMods();
-        }
-        else  
-        {
+        case LauncherState.Main:
             WidgetClient();
             WidgetInstaller();
             WidgetMenuButtons();
+            break;
+        case LauncherState.Settings:
+            WidgetSettings();
+            break;
+        case LauncherState.Patching:
+            WidgetPatch(currentClientEdit ?? SelectedClient);
+            break;
+        case LauncherState.Installer:
+            WidgetInstallerPopup();
+            break;
+        case LauncherState.Mods:
+            WidgetMods();
+            break;
         }
-
 
         renderer.AfterLayout();
         base.Draw(gameTime);

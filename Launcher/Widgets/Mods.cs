@@ -10,7 +10,6 @@ namespace FortLauncher;
 
 public partial class Launcher 
 {
-    public bool Mods_popup;
     private StringBuilder urlBuilder = new();
     private List<ModsData> Mods_modData;
 
@@ -64,7 +63,7 @@ public partial class Launcher
         ImGui.SameLine();
         if (ImGui.Button("Back")) 
         {
-            Mods_popup = false;
+            State = LauncherState.Main;
         }
         ImGui.End();
     }

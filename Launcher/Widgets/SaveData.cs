@@ -12,6 +12,9 @@ public partial class SaveData : ISerialize, IDeserialize
     public string CurrentInstaller;
 
     [TeuObject]
+    public string LaunchArguments = "";
+
+    [TeuObject]
     public List<Client> Clients = new();
     
     public SaveData() {}

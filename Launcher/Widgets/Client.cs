@@ -11,7 +11,6 @@ public partial class Launcher
     private HashSet<string> clientPaths = new();
     private string Client_hovered = "";
     private bool Client_renamePopup;
-    private bool Client_patchPopup;
     private string Client_newRename = "";
     private Client currentClientEdit;
     public Client SelectedClient;
@@ -43,7 +42,7 @@ public partial class Launcher
                 var str = client.ClientType.HasFlag(ClientType.FortRise) ? "Unpatch" : "Patch";
                 if (ImGui.MenuItem(str))
                 {
-                    Client_patchPopup = true;
+                    State = LauncherState.Patching;
                     Task.Run(() => Client_Patch(client));
                 }
                 if (ImGui.MenuItem("Rename"))
@@ -88,7 +87,7 @@ public partial class Launcher
         ImGui.BeginDisabled((SelectedClient == null || SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
         if (ImGui.Button("Patch")) 
         {
-            Client_patchPopup = true;
+            State = LauncherState.Patching;
             Task.Run(() => Client_Patch(SelectedClient));
         }
         ImGui.EndDisabled();
@@ -98,7 +97,7 @@ public partial class Launcher
         ImGui.BeginDisabled((SelectedClient == null || !SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
         if (ImGui.Button("Unpatch")) 
         {
-            Client_patchPopup = true;
+            State = LauncherState.Patching;
             Task.Run(() => Client_Patch(SelectedClient));
         }
         ImGui.EndDisabled();
@@ -199,7 +198,7 @@ public partial class Launcher
 
         if (ImGui.Button("Close")) 
         {
-            Client_patchPopup = false;
+            State = LauncherState.Main;
             consoleTexts = string.Empty;
         }
         ImGui.EndDisabled();

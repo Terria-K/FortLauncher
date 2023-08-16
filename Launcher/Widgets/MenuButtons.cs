@@ -37,12 +37,15 @@ public partial class Launcher
         MenuButtons_EndDisableIfNeeded();
         var smallButtonSize = largeButtonSize with { X = 100};
         ImGui.SetCursorPosX((ButtonPanelWidth * 0.26f) - (smallButtonSize.X * 0.5f));
-        ImGui.Button("Settings", smallButtonSize);
+        if (ImGui.Button("Settings", smallButtonSize)) 
+        {
+            State = LauncherState.Settings;
+        }
         ImGui.SameLine();
 
         if (ImGui.Button("Mods", smallButtonSize)) 
         {
-            Mods_popup = true;
+            State = LauncherState.Mods;
             Task.Run(() => NoRefreshMods());
         }
 
@@ -84,50 +87,29 @@ public partial class Launcher
 
     private void MenuButtons_LaunchFortRise() 
     {
-        bool wentFromVanilla = false;
-
         var path = SelectedClient.Path;
-        var origPath = Path.Combine(path, "fortOrig/TowerFall.exe");
         var towerFallPath = Path.Combine(path, "TowerFall.exe");
-        var origFortPath = Path.Combine(path, "fortOrig/FortRise.exe");
-        var vanillaTxt = Path.Combine(path, "vanilla.txt");
-
-        MenuButtons_errorPopup = true;
 
         try 
         {
             var process = new Process();
 
-            if (File.Exists(vanillaTxt))  
-            {
-                File.Copy(origFortPath, towerFallPath, true);
-                wentFromVanilla = true;
-            }
-
             process.StartInfo.FileName = towerFallPath;
+            process.StartInfo.Arguments = Data.LaunchArguments;
             process.StartInfo.WorkingDirectory = path;
-            if (process.Start() && wentFromVanilla) 
-            {
-                File.Delete(vanillaTxt);
+            if (process.Start()) 
                 return;
-            }
-            MenuButtons_errorPopup = true;
+            
             MenuButtons_error = "Process is still running.";
+            MenuButtons_errorPopup = true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
             Console.WriteLine(ex.StackTrace);
 
-            MenuButtons_errorPopup = true;
             MenuButtons_error = "Process is still running.";
-            if (!wentFromVanilla)
-                return;
-            
-            if (!File.Exists(origPath))
-                return;
-
-            using var _ = File.Create(vanillaTxt);
+            MenuButtons_errorPopup = true;
         }
     }
 
@@ -137,26 +119,20 @@ public partial class Launcher
         {
             var process = new Process();
             var path = SelectedClient.Path;
-            var origPath = Path.Combine(path, "fortOrig/TowerFall.exe");
             var towerFallPath = Path.Combine(path, "TowerFall.exe");
-            var vanillaTxt = Path.Combine(path, "vanilla.txt");
 
-            if (!File.Exists(vanillaTxt) && File.Exists(origPath)) 
-            {
-                var origFortPath = Path.Combine(path, "fortOrig/FortRise.exe");
-
-                using var _ = File.Create(vanillaTxt);
-                File.Copy(towerFallPath, origFortPath, true);
-                File.Copy(origPath, towerFallPath, true);
-            }
-
+            process.StartInfo.Arguments = Data.LaunchArguments + " --vanilla";
             process.StartInfo.FileName = towerFallPath;
             process.StartInfo.WorkingDirectory = path;
             process.Start();
         }
-        catch 
+        catch (Exception ex)
         {
-            // TODO Error Handling
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex.StackTrace);
+
+            MenuButtons_error = "Process is still running.";
+            MenuButtons_errorPopup = true;
         }
     }
 
