@@ -188,7 +188,7 @@ public partial class Launcher
         {
             string tagZip;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                tagZip = "NoAnsi";
+                tagZip = "NoANSI";
             else
                 tagZip = "OSXLinux";
             var zipName = $"FortRise.Installer.v{tag.Name}-{tagZip}.zip";
