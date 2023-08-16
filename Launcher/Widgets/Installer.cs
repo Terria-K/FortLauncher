@@ -1,4 +1,5 @@
 using System.Net;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using Ionic.Zip;
 using TeuJson;
@@ -185,7 +186,12 @@ public partial class Launcher
         isDownloading = true;
         try 
         {
-            var zipName = $"FortRise.Installer.v{tag.Name}-NoANSI.zip";
+            string tagZip;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                tagZip = "NoAnsi";
+            else
+                tagZip = "OSXLinux";
+            var zipName = $"FortRise.Installer.v{tag.Name}-{tagZip}.zip";
             var url = "https://github.com/Terria-K/FortRise/releases/download/" + tag.Name + $"/{zipName}";
             var httpClient = new HttpClient();
             var bytes = await httpClient.GetByteArrayAsync(url, token);
