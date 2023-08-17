@@ -22,7 +22,7 @@ public partial class Launcher
         ImGui.SameLine();
         ImGui.SetCursorPosX(109);
         WidgetSettingsCheckboxFlags("No Gamepads", "-nogamepads");
-        WidgetSettingsCheckboxFlags("No Intro", "-noIntro");
+        WidgetSettingsCheckboxFlags("No Intro", "-nointro");
         ImGui.SameLine();
         ImGui.SetCursorPosX(109);
         WidgetSettingsCheckboxFlags("No Gamepads Update", "-nogamepadupdates");
