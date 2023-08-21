@@ -20,8 +20,8 @@ public partial class Launcher
         ImGui.SetNextWindowPos(new System.Numerics.Vector2(0, 150));
         ImGui.SetNextWindowSize(new System.Numerics.Vector2(250, 305));
         ImGui.Begin("Clients", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar);
-        ImGui.SetCursorPosX((250 - ImGui.CalcTextSize("Clients").X) * 0.5f);
-        ImGui.Text("Clients");
+        ImGui.SetCursorPosX((250 - ImGui.CalcTextSize("TowerFall Directories").X) * 0.5f);
+        ImGui.Text("TowerFall Directories");
 
         ImGui.Separator();
 
@@ -84,7 +84,7 @@ public partial class Launcher
         }
         ImGui.SetCursorPosX(((posX + 50) - 300 * 0.5f));
         ImGui.SetCursorPosY(260);
-        ImGui.BeginDisabled((SelectedClient == null || SelectedClient.ClientType.HasFlag(ClientType.FortRise)) || string.IsNullOrEmpty(selectedInstallerVersion));
+        ImGui.BeginDisabled((SelectedClient == null || string.IsNullOrEmpty(selectedInstallerVersion)));
         if (ImGui.Button("Patch")) 
         {
             State = LauncherState.Patching;
@@ -290,9 +290,13 @@ public partial class Launcher
 
         var folderPathStr = new string(folderPath);
 
-        Data.Clients.Add(new Client(name, folderPathStr, type));
+        var newClient = new Client(name, folderPathStr, type);
+
+        Data.Clients.Add(newClient);
         clientPaths.Add(folderPathStr.Replace('\\', '/'));
         Save();
+        SelectedClient = newClient;
+        Data.CurrentClientPath = newClient.Path;
     }
 }
 

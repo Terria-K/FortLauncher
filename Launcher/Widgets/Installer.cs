@@ -14,6 +14,7 @@ public partial class Launcher
     private string selectedInstallerVersion = "";
     private bool isDownloading;
     private CancellationTokenSource source;
+    private StringProgress progress;
 
     public HashSet<string> Tags = new();
 
@@ -27,6 +28,7 @@ public partial class Launcher
         ImGui.Separator();
 
         ImGui.BeginChild("downloaded-installer-child", new System.Numerics.Vector2(230, 210));
+        bool deletedSomething = false;
 
         foreach (var tag in Tags) 
         {
@@ -43,14 +45,18 @@ public partial class Launcher
                 if (ImGui.MenuItem("Delete")) 
                 {
                     Directory.Delete($"installer/{tag}", true);
-                    FetchDownloadedVersions();
+                    deletedSomething = true;
                     if (tag == selectedInstallerVersion)
                         selectedInstallerVersion = "";
-                    Save();
                 }
                 
                 ImGui.EndPopup();
             }
+        }
+        if (deletedSomething) 
+        {
+            FetchDownloadedVersions();
+            Save();
         }
 
         ImGui.EndChild();
@@ -170,7 +176,8 @@ public partial class Launcher
 
         ImGui.SetCursorPosX((DownloadWidth * 0.5f) - (ImGui.CalcTextSize($"Downloading {currentTag.Name}...").X) / 2);
         ImGui.Text($"Downloading {currentTag.Name}...");
-
+        ImGui.SetCursorPosX((DownloadWidth * 0.5f) - (ImGui.CalcTextSize($"{progress.Bytes}").X) / 2);
+        ImGui.Text($"{progress.Bytes}");
         ImGui.SetCursorPosX((DownloadWidth * 0.37f));
         ImGui.SetCursorPosY(90);
         if (ImGui.Button("Cancel")) 
@@ -183,6 +190,8 @@ public partial class Launcher
 
     private async Task DownloadVersion(VersionTags tag, CancellationToken token) 
     {
+        progress = new StringProgress();
+        progress.Reset();
         isDownloading = true;
         try 
         {
@@ -193,8 +202,10 @@ public partial class Launcher
                 tagZip = "OSXLinux";
             var zipName = $"FortRise.Installer.v{tag.Name}-{tagZip}.zip";
             var url = "https://github.com/Terria-K/FortRise/releases/download/" + tag.Name + $"/{zipName}";
+            using var memStream = new MemoryStream();
             var httpClient = new HttpClient();
-            var bytes = await httpClient.GetByteArrayAsync(url, token);
+            await httpClient.DownloadAsync(url, memStream, progress, token);
+            var bytes = memStream.ToArray();
 
             var installerDirectory = $"installer/{tag.Name}";
 
@@ -206,6 +217,7 @@ public partial class Launcher
             await File.WriteAllBytesAsync(filePath, bytes);
 
             ExtractVersion(filePath, installerDirectory, zipName);
+            selectedInstallerVersion = Data.CurrentInstaller = tag.Name;
         }
         catch (TaskCanceledException) 
         {

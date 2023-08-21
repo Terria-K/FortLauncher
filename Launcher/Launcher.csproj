@@ -4,6 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- <RuntimeIdentifier>osx-x64</RuntimeIdentifier> -->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,10 +15,10 @@
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::IsOSPlatform('Windows'))">
+  <!-- <PropertyGroup Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::IsOSPlatform('Windows'))">
     <PublishAot>true</PublishAot>
     <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">
     <OutputType>Exe</OutputType>
@@ -33,18 +34,19 @@
     <PackageReference Include="ImGui.NET" Version="1.89.7.1" />
     <PackageReference Include="TeuJson" Version="3.1.2" />
     <PackageReference Include="TeuJson.Generator" Version="3.1.2" />
+    <PackageReference Include="Dotnet.Bundle" Version="*" />
   </ItemGroup>
 
   <ItemGroup>
-		<Content Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="..\nativelibs\x64\**\*.*">
+		<Content Condition="$([MSBuild]::IsOSPlatform('Windows'))" Include="../nativelibs/x64/**/*.*">
 			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-    <Content Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="..\nativelibs\osx\**\*.*">
+    <Content Condition="$([MSBuild]::IsOSPlatform('OSX'))" Include="../nativelibs/osx/**/*.*">
 			<Link>osx/%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-    <Content Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="..\nativelibs\lib64\**\*.*">
+    <Content Condition="$([MSBuild]::IsOSPlatform('Linux'))" Include="../nativelibs/lib64/**/*.*">
 			<Link>lib64/%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
@@ -79,5 +81,21 @@
     <DirectPInvoke Include="FAudio" />
     <DirectPInvoke Include="libtheorafile" />
   </ItemGroup>
+
+  <!-- Mac OS related stuff -->
+
+  <PropertyGroup>
+    <CFBundleName>FortLauncher</CFBundleName> 
+    <CFBundleDisplayName>FortLauncher</CFBundleDisplayName>
+    <CFBundleIdentifier>com.terria.fortlauncher</CFBundleIdentifier>
+    <CFBundleVersion>2.1.0</CFBundleVersion>
+    <CFBundleShortVersionString>2.1</CFBundleShortVersionString>
+    <CFBundlePackageType>APPL</CFBundlePackageType>
+    <CFBundleSignature>????</CFBundleSignature>
+    <CFBundleExecutable>Launcher</CFBundleExecutable>
+    <CFBundleIconFile>Launcher.icns</CFBundleIconFile> 
+    <NSPrincipalClass>NSApplication</NSPrincipalClass>
+    <NSHighResolutionCapable>true</NSHighResolutionCapable>
+  </PropertyGroup>
 
 </Project>

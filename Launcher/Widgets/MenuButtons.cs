@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using FortLauncher.Mods;
 using ImGuiNET;
 
 namespace FortLauncher;
@@ -46,6 +47,8 @@ public partial class Launcher
         if (ImGui.Button("Mods", smallButtonSize)) 
         {
             State = LauncherState.Mods;
+            Mods_allMods = ModManager.GetAllMods(SelectedClient);
+            Mods_blacklistdata = ModManager.GetBlacklist(SelectedClient);
             Task.Run(() => NoRefreshMods());
         }
 

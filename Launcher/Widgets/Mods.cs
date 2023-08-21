@@ -1,8 +1,6 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
+using FortLauncher.ClientProcess;
+using FortLauncher.Mods;
 using ImGuiNET;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TeuJson;
 
@@ -10,50 +8,100 @@ namespace FortLauncher;
 
 public partial class Launcher 
 {
-    private StringBuilder urlBuilder = new();
     private List<ModsData> Mods_modData;
+    private HashSet<string> Mods_blacklistdata;
+    private string[] Mods_allMods;
 
     public void WidgetMods() 
     {
         ImGui.SetNextWindowPos(new System.Numerics.Vector2(40, 40));
         ImGui.SetNextWindowSize(new System.Numerics.Vector2(Width - 80, Height - 80));
         ImGui.Begin("Mods List", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
-        ImGui.BeginChild("mod-list-child", new System.Numerics.Vector2(Width - 130, Height - 185));
-
-        if (Mods_modData != null)
-        for (int i = 0; i < Mods_modData.Count; i++) 
+        if (ImGui.BeginTabBar("Tab")) 
         {
-            var data = Mods_modData[i];
-            ImGui.BeginChild(data.Name + "_MODS", new System.Numerics.Vector2(210, 250));
-            if (ImGui.ImageButton(data.Name + "__IMAGE", data.TexturePtr, new System.Numerics.Vector2(200, 150))) 
+            if (ImGui.BeginTabItem("Installed Mods")) 
             {
-                OpenUrl(data.Url);
+                ImGui.BeginChild("installed-mod-child", new System.Numerics.Vector2(Width - 130, Height - 185));
+                if (SelectedClient == null) 
+                {
+                    ImGui.Text("Client hasn't been selected");
+                }
+                else 
+                {
+                    if (Mods_allMods.Length == 0)
+                        ImGui.Text("No Mods Installed");
+                    else 
+                    {
+                        ImGui.SetCursorPosX(380);
+                        if (ImGui.Button("Enable All")) 
+                        {
+                            var cloned = Mods_blacklistdata.ToArray();
+                            foreach (var mod in cloned) 
+                            {
+                                ModManager.RemoveToBlacklist(SelectedClient, mod, Mods_blacklistdata);
+                            }
+                        }
+                        ImGui.SetCursorPosX(377);
+                        if (ImGui.Button("Disable All")) 
+                        {
+                            foreach (var mod in Mods_allMods) 
+                            {
+                                ModManager.AddToBlacklist(SelectedClient, mod, Mods_blacklistdata);
+                            }
+                        }
+                        foreach (var mod in Mods_allMods) 
+                        {
+                            WidgetModButton(mod);
+                        }
+                    }
+                }
+                ImGui.EndChild();
+                ImGui.EndTabItem();
             }
-            ImGui.Text(data.Name);
-            ImGui.Text(data.Submitter);
-            ImGui.Text(data.Description);
-            ImGui.Text($"{data.Downloads} Downloads");
-            ImGui.BeginDisabled(SelectedClient == null);
-            if (ImGui.Button("Download")) 
+            if (ImGui.BeginTabItem("Mod List")) 
             {
-                OpenUrl(data.DownloadUrl);
+                ImGui.BeginChild("mod-list-child", new System.Numerics.Vector2(Width - 130, Height - 185));
+
+                if (Mods_modData != null)
+                for (int i = 0; i < Mods_modData.Count; i++) 
+                {
+                    var data = Mods_modData[i];
+                    ImGui.BeginChild(data.Name + "_MODS", new System.Numerics.Vector2(210, 250));
+                    if (ImGui.ImageButton(data.Name + "__IMAGE", data.TexturePtr, new System.Numerics.Vector2(200, 150))) 
+                    {
+                        ProcessManager.OpenUrl(data.Url);
+                    }
+                    ImGui.Text(data.Name);
+                    ImGui.Text(data.Submitter);
+                    ImGui.Text(data.Description);
+                    ImGui.Text($"{data.Downloads} Downloads");
+                    ImGui.BeginDisabled(SelectedClient == null);
+                    if (ImGui.Button("Download")) 
+                    {
+                        ProcessManager.OpenUrl(data.DownloadUrl);
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.Button("View")) 
+                    {
+                        ProcessManager.OpenUrl(data.Url);
+                    }
+                    ImGui.EndDisabled();
+                    ImGui.EndChild();
+                    if (i % 4 != 3)
+                        ImGui.SameLine();
+                }
+
+                ImGui.EndChild();
+                ImGui.EndTabItem();
             }
-            ImGui.SameLine();
-            if (ImGui.Button("View")) 
-            {
-                OpenUrl(data.Url);
-            }
-            ImGui.EndDisabled();
-            ImGui.EndChild();
-            if (i % 3 != 3)
-                ImGui.SameLine();
+
+            ImGui.EndTabBar();
         }
 
-        ImGui.EndChild();
         ImGui.Separator();
         if (ImGui.Button("More Mods")) 
         {
-            OpenUrl("https://gamebanana.com/games/18654");
+            ProcessManager.OpenUrl("https://gamebanana.com/games/18654");
         }
         ImGui.SameLine();
         if (ImGui.Button("Refresh")) 
@@ -68,33 +116,21 @@ public partial class Launcher
         ImGui.End();
     }
 
-    private void OpenUrl(string url)
+    private void WidgetModButton(string mod) 
     {
-        try
+        bool isWhitelisted = !ModManager.IsBlacklisted(mod, Mods_blacklistdata);
+        ImGui.BeginChild(mod + "_Mod", new System.Numerics.Vector2(800, 30));
+        ImGui.SetCursorPosX(200);
+        ImGui.SetCursorPosY(10);
+        ImGui.Text(mod);
+        ImGui.SameLine();
+
+        ImGui.SetCursorPosX(600);
+        if (ImGui.Checkbox("", ref isWhitelisted)) 
         {
-            Process.Start(url);
+            ModManager.ToggleBlacklist(SelectedClient, mod, Mods_blacklistdata);
         }
-        catch
-        {
-            // hack because of this: https://github.com/dotnet/corefx/issues/10361
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start("xdg-open", url);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start("open", url);
-            }
-            else
-            {
-                throw;
-            }
-        }
+        ImGui.EndChild();
     }
 
     public async Task NoRefreshMods() 
@@ -120,7 +156,6 @@ public partial class Launcher
             var json = await httpClient.GetStringAsync("https://api.gamebanana.com/Core/List/New?itemtype=Mod&gameid=18654&page=1");
 
             var arrayOfModsID = JsonTextReader.FromText(json).AsJsonArray;
-            urlBuilder.Append("https://api.gamebanana.com/Core/Item/Data?");
             foreach (JsonArray mod in arrayOfModsID.AsParallel())
             {
                 var result = await httpClient.GetStringAsync(
@@ -180,11 +215,6 @@ public partial class Launcher
         };
 
         Mods_modData.Add(modData);
-    }
-
-    public void AddMod(JsonArray array, int index) 
-    {
-        urlBuilder.Append($"&itemtype[{index}]=Mod&itemid[{index}]={array[1].AsInt32}&fields[{index}]=name,Owner().name,description,downloads,Preview().sSubFeedImageUrl(),Url().sDownloadUrl()");
     }
 }
 
